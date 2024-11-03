@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.praveen.spring.service.EmailSenderService;
 import com.praveen.spring.vo.EmailOTPRequestVO;
+import com.praveen.spring.vo.EmailOTPValidationVO;
 import com.praveen.spring.vo.OTPVO;
 
 @RestController
-@RequestMapping("/otpAPI/email")
+@RequestMapping("api/otp/email")
 public class EmailOTPController {
 
     @Autowired
@@ -29,8 +30,11 @@ public class EmailOTPController {
     }
     
     @PostMapping("/validate")
-    public String validateOTP(@RequestBody EmailOTPRequestVO emailRequest) {
+    public String validateOTP(@RequestBody EmailOTPValidationVO emailOTPValidationVO) {
     	
-        return "Validating OTP";
+    	if(emailSenderService.emailOTPValidate(emailOTPValidationVO)) {
+    		return "OTP Validated Successfully";
+    	}
+        return "OTP is Not Valid. Please Enter Valid OTP";
     }
 }

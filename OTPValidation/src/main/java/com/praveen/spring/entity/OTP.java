@@ -19,7 +19,7 @@ import lombok.Data;
 @NamedQueries({
     @NamedQuery(
         name = "OTP.findLatestValidOtpByEmail",
-        query = "SELECT ot FROM OTP ot WHERE ot.email = :email AND ot.expirationTime > CURRENT_TIMESTAMP ORDER BY ot.sentTime DESC"
+        query = "SELECT ot FROM OTP ot WHERE ot.email = :email AND ot.expirationTime >= CURRENT_TIMESTAMP ORDER BY ot.sentTime DESC"
     )
 })
 public class OTP {

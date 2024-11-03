@@ -1,5 +1,6 @@
 package com.praveen.spring.service;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 
 import org.springframework.beans.BeanUtils;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.praveen.spring.entity.OTP;
 import com.praveen.spring.repository.EmailOTPValidationRepository;
 import com.praveen.spring.utils.EmailConstants;
+import com.praveen.spring.vo.EmailOTPValidationVO;
 import com.praveen.spring.vo.OTPVO;
 
 @Service
@@ -20,7 +22,8 @@ public class EmailSenderService {
 	@Autowired
 	private JavaMailSender mailSender;
 	
-	@Autowired EmailOTPValidationRepository emailOTPValidationRepository;
+	@Autowired 
+	protected EmailOTPValidationRepository emailOTPValidationRepository;
 	
 	
 	public OTPVO sendMail (String toMail, String subject, String body) {
@@ -51,8 +54,8 @@ public class EmailSenderService {
 						toMail.substring(0, toMail.indexOf(EmailConstants.AT_SYMBOL)), Integer.parseInt(otp.getOtp())));
 				mailSender.send(mailMessage);
 				emailOTPValidationRepository.save(otp);
+				BeanUtils.copyProperties(otp, otpVO);
 			}
-			BeanUtils.copyProperties(otp, otpVO);
 			return otpVO;
 		} catch (MailException e) {
 			e.printStackTrace();
@@ -86,5 +89,22 @@ public class EmailSenderService {
         		EmailConstants.NEW_LINE + EmailConstants.BODY_BEFORE_OTP + otp +
         		EmailConstants.NEW_LINE + EmailConstants.BODY_AFTER_OTP + EmailConstants.SIGNATURE;
     }
+
+	public boolean emailOTPValidate(EmailOTPValidationVO emailOTPValidationVO) {
+		
+		OTP otp = new OTP();
+		
+		otp = this.getActiveOTP(emailOTPValidationVO.getEmail());
+		
+		if(otp!=null) {
+			if(otp.getOtp().equals(emailOTPValidationVO.getOtp())) {
+				otp.setExpirationTime(LocalDateTime.now());
+				emailOTPValidationRepository.save(otp);
+				return Boolean.TRUE;
+			}
+			return Boolean.FALSE;
+		}
+		return Boolean.FALSE;
+	}
 
 }
